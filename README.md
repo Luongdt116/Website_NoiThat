@@ -1,66 +1,97 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🛋️ Website Bán Đồ Nội Thất Trực Tuyến
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Đồ án tích hợp — Xây dựng website bán đồ nội thất trực tuyến (Furniture Store Online).
 
-## About Laravel
+**Tech stack:** Laravel 11 · MySQL 8.0 · Blade + Bootstrap 5 · Docker Compose · GitHub Actions CI
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Chức năng chính
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Nhóm | Chức năng |
+|---|---|
+| Khách hàng | Duyệt sản phẩm, tìm kiếm & lọc (từ khóa, danh mục, chất liệu, khoảng giá), giỏ hàng, đặt hàng COD, lịch sử đơn |
+| Tài khoản | Đăng ký, đăng nhập, khóa/mở tài khoản (admin) |
+| Quản trị | CRUD danh mục & sản phẩm (upload ảnh + tồn kho), quản lý đơn hàng (xác nhận → giao → hoàn tất / hủy), quản lý người dùng, dashboard thống kê |
+| API | RESTful API cho sản phẩm & danh mục (đọc công khai, ghi qua Sanctum token) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🏗️ Kiến trúc 3-layer
 
-## Learning Laravel
+```
+Route → Controller (Web/Api) → Service (nghiệp vụ) → Repository (truy vấn) → Model (Eloquent) → MySQL
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Đặt hàng** chạy trong DB transaction: kiểm tra tồn kho → tạo Order + OrderItems → trừ kho; thiếu hàng thì rollback toàn bộ.
+- Thanh toán là **COD mô phỏng** (`payment_status = cod_pending`), không tích hợp cổng thật.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🚀 Cài đặt & chạy
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Cách 1: Máy local (XAMPP)
 
-## Laravel Sponsors
+```bash
+# 1. Cấu hình database trong .env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=furniture
+DB_USERNAME=root
+DB_PASSWORD=cscorner        # mật khẩu MySQL của bạn
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 2. Cài dependency và khởi tạo
+composer install
+cp .env.example .env        # nếu chưa có .env
+php artisan key:generate
+php artisan migrate --seed  # tạo bảng + dữ liệu demo
+php artisan storage:link    # link thư mục ảnh upload
+php artisan serve           # -> http://localhost:8000
+```
 
-### Premium Partners
+> Lưu ý: cần tạo database `furniture` trước (phpMyAdmin hoặc lệnh SQL `CREATE DATABASE furniture CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Cách 2: Docker Compose
 
-## Contributing
+```bash
+docker compose up -d
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
+# Web: http://localhost:8000 — phpMyAdmin: http://localhost:8080
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 👤 Tài khoản demo
 
-## Code of Conduct
+| Vai trò | Email | Mật khẩu |
+|---|---|---|
+| Quản trị viên | admin@furniture.test | password |
+| Khách hàng | user@furniture.test | password |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Chi tiết xem [resources/accounts.md](resources/accounts.md).
 
-## Security Vulnerabilities
+## 🧪 Kiểm thử
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan test            # 8 feature tests: auth, giỏ hàng, đặt hàng, phân quyền
+./vendor/bin/pint --test    # kiểm tra style code
+```
 
-## License
+## 📚 Tài liệu đồ án
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Trong thư mục [`docs/`](docs/):
+- `Proposal-WebNoiThat.docx` — Proposal đề tài
+- `BaoCao-WebNoiThat.docx` — Báo cáo tổng hợp
+- `SoDo-UML.md` — Sơ đồ Use-case, Class/ERD, Sequence (Mermaid)
+
+## 🗂️ Cấu trúc chính
+
+```
+app/
+├── Http/Controllers/{Web,Api}/   # Controller trả Blade / JSON
+├── Http/Middleware/              # EnsureUserIsAdmin
+├── Models/                       # Eloquent: User, Category, Product, Cart, Order...
+├── Repositories/                 # Truy vấn DB
+├── Services/                     # Nghiệp vụ (OrderService có transaction)
+database/
+├── migrations/                   # Schema các bảng
+└── seeders/                      # Dữ liệu demo
+docs/                             # Proposal, báo cáo, sơ đồ UML
+resources/views/                  # Blade views (khách hàng + admin)
+routes/                           # web.php, api.php, auth.php
+```
