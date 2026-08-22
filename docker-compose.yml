@@ -1,0 +1,39 @@
+# Docker Compose: PHP 8.3 + MySQL 8.0 + phpMyAdmin (đồ án web nội thất)
+services:
+  app:
+    build: .
+    container_name: furniture-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+    working_dir: /var/www
+    depends_on:
+      - db
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  db:
+    image: mysql:8.0
+    container_name: furniture-db
+    environment:
+      MYSQL_DATABASE: furniture
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: furniture
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: furniture-pma
+    environment:
+      PMA_HOST: db
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  dbdata:

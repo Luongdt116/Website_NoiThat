@@ -1,0 +1,23 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: furniture
+          MYSQL_ROOT_PASSWORD: root
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.3', extensions: pdo_mysql }
+      - run: composer install -q --no-ansi
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan migrate --force
+      - run: php artisan test
+      - run: ./vendor/bin/pint --test
