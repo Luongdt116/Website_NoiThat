@@ -33,7 +33,7 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=furniture
 DB_USERNAME=root
-DB_PASSWORD=cscorner        # mật khẩu MySQL của bạn
+DB_PASSWORD=cscorner        
 
 # 2. Cài dependency và khởi tạo
 composer install
