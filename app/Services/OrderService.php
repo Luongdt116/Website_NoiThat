@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\OutOfStockException;
 use App\Models\Order;
 use App\Models\Product;
 use App\Repositories\OrderRepository;
@@ -28,13 +29,19 @@ class OrderService
             $total = 0;
             $lines = [];
             foreach ($items as $item) {
-                $product = $this->products->find($item['product_id']);
+                // lockForUpdate: chặn 2 đơn đặt song song cùng đọc stock cũ rồi cùng trừ (âm kho).
+                // Request sau phải đợi khóa nhả mới đọc được stock MỚI NHẤT.
+                $product = Product::whereKey($item['product_id'])->lockForUpdate()->first();
                 // Phân biệt 2 loại lỗi để message thân thiện với người dùng
                 if (! $product) {
-                    throw new Exception('Một sản phẩm trong giỏ không còn tồn tại, hãy xóa nó khỏi giỏ.');
+                    throw new OutOfStockException('Một sản phẩm trong giỏ không còn tồn tại, hãy xóa nó khỏi giỏ.', $item['product_id'], 0);
                 }
                 if ($product->stock < $item['quantity']) {
-                    throw new Exception("Sản phẩm {$product->name} chỉ còn {$product->stock}");
+                    throw new OutOfStockException(
+                        "Rất tiếc, '{$product->name}' vừa bị khách khác mua mất một phần (chỉ còn {$product->stock}).",
+                        $product->id,
+                        (int) $product->stock
+                    );
                 }
                 $total += $product->price * $item['quantity'];
                 $lines[] = [

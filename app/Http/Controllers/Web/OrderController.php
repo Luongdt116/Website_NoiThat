@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Exceptions\OutOfStockException;
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
 // dùng để kiểm tra quyền xem đơn của chính mình
 use App\Services\CartService;
 use App\Services\OrderService;
@@ -40,9 +42,34 @@ class OrderController extends Controller
             $this->cart->clear(auth()->id()); // xóa giỏ sau khi đặt thành công
 
             return redirect()->route('orders.show', $order->id)->with('success', 'Đặt hàng thành công! Chúng tôi sẽ liên hệ bạn sớm.');
-        } catch (\Exception $e) {
-            // Thường là hết hàng: transaction đã rollback, tồn kho nguyên vẹn
+        } catch (OutOfStockException $e) {
+            // Hết hàng do khách khác mua mất trước: dọn dòng giỏ tương ứng để user không bị kẹt lặp lại lỗi
+            $this->handleOutOfStock($e);
+
             return back()->withInput()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            // Lỗi nghiệp vụ khác: transaction đã rollback, tồn kho nguyên vẹn
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Xử lý giỏ khi sản phẩm vừa bị mua mất:
+     * - Còn 0 (hoặc sản phẩm đã xóa): xóa luôn dòng giỏ.
+     * - Còn ít hơn số trong giỏ: giảm số lượng giỏ về mức còn lại.
+     */
+    private function handleOutOfStock(OutOfStockException $e): void
+    {
+        $userId = auth()->id();
+        $cartItem = Cart::where('user_id', $userId)->where('product_id', $e->productId)->first();
+
+        if ($e->remainingStock <= 0) {
+            optional($cartItem)->delete();
+
+            return;
+        }
+        if ($cartItem && $cartItem->quantity > $e->remainingStock) {
+            $this->cart->updateQty($cartItem->id, $e->remainingStock);
         }
     }
 

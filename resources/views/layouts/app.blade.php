@@ -23,7 +23,7 @@
     </style>
     @stack('styles')
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 {{-- ===== Navbar dùng chung toàn site ===== --}}
 <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
     <div class="container">
@@ -61,6 +61,8 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">{{ auth()->user()->name }}</a>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="bi bi-person-circle"></i> Tài khoản của tôi</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 {{-- Nút đăng xuất dùng form POST (bắt buộc của Laravel) --}}
                                 <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Đăng xuất</a>
@@ -77,7 +79,8 @@
     </div>
 </nav>
 
-<main class="container py-4">
+{{-- flex-grow-1 đẩy footer xuống đáy khi nội dung ngắn (trang Giỏ hàng, Đơn của tôi...) --}}
+<main class="container py-4 flex-grow-1">
     {{-- Thông báo thành công / lỗi từ session flash --}}
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show">
@@ -102,7 +105,8 @@
     @yield('content')
 </main>
 
-<footer class="border-top mt-5 py-4 text-center text-muted bg-white">
+{{-- mt-auto: footer luôn bám đáy viewport (kết hợp flex-column trên body) --}}
+<footer class="border-top py-4 text-center text-muted bg-white mt-auto">
     <div class="container">
         <p class="mb-0">© {{ date('Y') }} Furniture Store — Đồ án Website bán đồ nội thất trực tuyến</p>
     </div>

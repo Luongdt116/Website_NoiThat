@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\OrderController;
 use App\Http\Controllers\Web\ProductController;
+use App\Http\Controllers\Web\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +38,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/don-hang', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/don-hang-cua-toi', [OrderController::class, 'history'])->name('orders.history');
     Route::get('/don-hang/{id}', [OrderController::class, 'show'])->name('orders.show');
+
+    // ===== Tài khoản của tôi: cập nhật thông tin + đổi mật khẩu =====
+    Route::get('/tai-khoan', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/tai-khoan', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/tai-khoan/mat-khau', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
 // ===== Khu vực quản trị (/admin): yêu cầu đăng nhập + is_admin =====

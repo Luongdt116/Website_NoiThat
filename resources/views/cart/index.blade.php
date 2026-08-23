@@ -3,6 +3,10 @@
 @section('title', 'Giỏ hàng')
 
 @section('content')
+@php
+    // Dòng giỏ vượt tồn kho hiện tại (có thể do khách khác mua mất một phần)
+    $overStock = $items->filter(fn($i) => $i->product && $i->quantity > $i->product->stock);
+@endphp
 <h2 class="text-wood mb-4"><i class="bi bi-cart3"></i> Giỏ hàng của bạn</h2>
 
 @if($items->isEmpty())
@@ -12,11 +16,17 @@
         <p>Hãy duyệt <a href="{{ route('products.index') }}">danh sách sản phẩm</a> để chọn món đồ ưng ý nhé!</p>
     </div>
 @else
+    @if($overStock->isNotEmpty())
+        <div class="alert alert-warning d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>Một số sản phẩm trong giỏ vừa giảm số lượng còn lại trong kho (khách khác đã mua trước). Hãy cập nhật lại số lượng trước khi đặt hàng.</div>
+        </div>
+    @endif
     <div class="row g-4">
         {{-- Danh sách sản phẩm trong giỏ --}}
         <div class="col-lg-8">
             @foreach($items as $i)
-                <div class="card mb-3">
+                <div class="card mb-3 {{ $i->product && $i->quantity > $i->product->stock ? 'border-danger' : '' }}">
                     <div class="card-body d-flex align-items-center gap-3">
                         {{-- Ảnh nhỏ hoặc icon placeholder --}}
                         <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:80px;height:80px;flex-shrink:0">
@@ -29,6 +39,9 @@
                         <div class="flex-grow-1">
                             <a href="{{ route('products.show', $i->product->id) }}" class="text-decoration-none text-dark fw-bold">{{ $i->product->name }}</a>
                             <div class="text-muted small">{{ number_format($i->product->price, 0, ',', '.') }} ₫ / sản phẩm</div>
+                            @if($i->quantity > $i->product->stock)
+                                <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Chỉ còn {{ $i->product->stock }} trong kho</span>
+                            @endif
                         </div>
                         {{-- Form cập nhật số lượng (POST) --}}
                         <form method="POST" action="{{ route('cart.update', $i->id) }}" class="d-flex gap-2 align-items-center">
@@ -59,7 +72,15 @@
                     <span class="fw-bold text-wood">{{ number_format($total, 0, ',', '.') }} ₫</span>
                 </div>
                 <hr>
-                <a href="{{ route('orders.checkout') }}" class="btn btn-wood w-100"><i class="bi bi-truck"></i> Tiến hành đặt hàng (COD)</a>
+                @if($overStock->isNotEmpty())
+                    {{-- Chặn đặt hàng khi giỏ có dòng vượt kho — tránh đặt xong lại bị từ chối --}}
+                    <button class="btn btn-wood w-100" disabled title="Cập nhật số lượng sản phẩm vượt kho trước khi đặt">
+                        <i class="bi bi-truck"></i> Tiến hành đặt hàng (COD)
+                    </button>
+                    <div class="text-danger small mt-1 text-center"><i class="bi bi-info-circle"></i> Cập nhật số lượng trước khi đặt hàng</div>
+                @else
+                    <a href="{{ route('orders.checkout') }}" class="btn btn-wood w-100"><i class="bi bi-truck"></i> Tiến hành đặt hàng (COD)</a>
+                @endif
                 <a href="{{ route('products.index') }}" class="btn btn-outline-secondary w-100 mt-2">← Tiếp tục mua sắm</a>
             </div>
         </div>

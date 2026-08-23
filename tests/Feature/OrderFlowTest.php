@@ -178,6 +178,49 @@ class OrderFlowTest extends TestCase
     }
 
     /**
+     * Người khác mua mất một phần hàng trước khi mình chốt đơn: đơn bị từ chối,
+     * giỏ TỰ GIẢM về mức còn lại, tồn kho nguyên vẹn.
+     */
+    public function test_partially_sold_out_adjusts_cart_and_rejects_order(): void
+    {
+        $this->actingAs($this->user);
+        $this->post('/gio-hang/them', ['product_id' => $this->product->id, 'quantity' => 5]);
+
+        // Giả lập người B mua trước 8 chiếc: kho 10 -> 2 (giỏ A vẫn đang giữ 5)
+        Product::whereKey($this->product->id)->decrement('stock', 8);
+
+        $response = $this->post('/don-hang', ['address' => 'addr', 'phone' => '0900000000']);
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseCount('orders', 0);
+        // Giỏ tự điều chỉnh về đúng mức kho còn lại, tồn kho không bị trừ thêm
+        $this->assertDatabaseHas('carts', [
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+            'quantity' => 2,
+        ]);
+        $this->assertDatabaseHas('products', ['id' => $this->product->id, 'stock' => 2]);
+    }
+
+    /**
+     * Hết hẳn hàng (khách khác mua chiếc cuối): dòng giỏ bị xóa để user đặt lại được.
+     */
+    public function test_sold_out_removes_cart_line(): void
+    {
+        $this->actingAs($this->user);
+        $this->post('/gio-hang/them', ['product_id' => $this->product->id, 'quantity' => 2]);
+
+        Product::whereKey($this->product->id)->update(['stock' => 0]);
+
+        $response = $this->post('/don-hang', ['address' => 'addr', 'phone' => '0900000000']);
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('carts', 0);
+        $this->assertDatabaseHas('products', ['id' => $this->product->id, 'stock' => 0]);
+    }
+
+    /**
      * Hủy 2 lần không hoàn kho 2 lần (guard chống hoàn trùng).
      */
     public function test_cancelling_twice_does_not_double_restore_stock(): void
