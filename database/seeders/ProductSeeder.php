@@ -30,7 +30,7 @@ class ProductSeeder extends Seeder
         foreach ($this->items as [$name, $price, $stock, $material, $catSlug]) {
             // Tìm danh mục theo slug (CategorySeeder đã tạo trước)
             $category = Category::where('slug', $catSlug)->first();
-            if (!$category) {
+            if (! $category) {
                 continue; // bỏ qua nếu danh mục chưa tồn tại
             }
             Product::create([

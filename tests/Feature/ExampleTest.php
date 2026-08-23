@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 // RefreshDatabase: reset DB trong memory/file sqlite cho từng test (nhanh, cô lập)
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,8 +18,8 @@ class ExampleTest extends TestCase
     public function test_the_application_returns_a_successful_response(): void
     {
         // Tạo dữ liệu mẫu tối thiểu: 1 danh mục + 1 sản phẩm
-        \App\Models\Category::create(['name' => 'Bàn', 'slug' => 'ban']);
-        \App\Models\Product::create([
+        Category::create(['name' => 'Bàn', 'slug' => 'ban']);
+        Product::create([
             'name' => 'Bàn test', 'price' => 100000, 'stock' => 5, 'category_id' => 1,
         ]);
 

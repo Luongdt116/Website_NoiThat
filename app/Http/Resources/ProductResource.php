@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Resources;
+
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProductResource extends JsonResource
@@ -7,9 +9,9 @@ class ProductResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id' => $this->id, 'name' => $this->name, 'price' => (float)$this->price,
+            'id' => $this->id, 'name' => $this->name, 'price' => (float) $this->price,
             'stock' => $this->stock, 'material' => $this->material, 'image' => $this->image,
-            'category' => $this->whenLoaded('category', fn() => $this->category->name),
+            'category' => $this->whenLoaded('category', fn () => $this->category->name),
         ];
     }
 }

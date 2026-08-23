@@ -1,7 +1,10 @@
 <?php
+
 namespace Database\Seeders;
-use Illuminate\Database\Seeder;
+
 use App\Models\Category;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 // Seeder danh mục mẫu
 class CategorySeeder extends Seeder
@@ -10,7 +13,7 @@ class CategorySeeder extends Seeder
     {
         $items = ['Bàn', 'Ghế', 'Tủ', 'Giường', 'Kệ'];
         foreach ($items as $name) {
-            Category::create(['name' => $name, 'slug' => \Illuminate\Support\Str::slug($name), 'description' => "Danh mục $name"]);
+            Category::create(['name' => $name, 'slug' => Str::slug($name), 'description' => "Danh mục $name"]);
         }
     }
 }

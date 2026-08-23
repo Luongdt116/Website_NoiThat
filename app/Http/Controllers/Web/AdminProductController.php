@@ -49,6 +49,7 @@ class AdminProductController extends Controller
         }
 
         Product::create($data);
+
         return redirect()->route('admin.products.index')->with('success', 'Đã thêm sản phẩm.');
     }
 
@@ -76,6 +77,7 @@ class AdminProductController extends Controller
         }
 
         $product->update($data);
+
         return redirect()->route('admin.products.index')->with('success', 'Đã cập nhật sản phẩm.');
     }
 

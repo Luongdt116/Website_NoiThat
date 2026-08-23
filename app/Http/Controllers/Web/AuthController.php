@@ -27,12 +27,13 @@ class AuthController extends Controller
 
         // Chặn tài khoản đã bị admin khóa
         $user = User::where('email', $credentials['email'])->first();
-        if ($user && !$user->is_active) {
+        if ($user && ! $user->is_active) {
             return back()->withErrors(['email' => 'Tài khoản của bạn đã bị khóa.'])->onlyInput('email');
         }
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
             return redirect()->intended(route('home'));
         }
 
@@ -61,6 +62,7 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+
         return redirect(route('home'))->with('success', 'Đăng ký thành công, chào mừng bạn!');
     }
 

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,7 +15,9 @@ class OrderFlowTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private User $admin;
+
     private Product $product;
 
     protected function setUp(): void
@@ -121,7 +124,7 @@ class OrderFlowTest extends TestCase
         $this->post('/don-hang', ['address' => 'addr', 'phone' => '0900000000']);
 
         // Lấy id đơn vừa tạo (không giả định = 1 vì sequence không reset giữa các test)
-        $orderId = \App\Models\Order::where('user_id', $this->user->id)->value('id');
+        $orderId = Order::where('user_id', $this->user->id)->value('id');
 
         // Chuyển sang vai admin và xác nhận đơn
         $this->actingAs($this->admin)

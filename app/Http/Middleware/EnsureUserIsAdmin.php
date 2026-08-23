@@ -12,12 +12,12 @@ class EnsureUserIsAdmin
     public function handle(Request $request, Closure $next): Response
     {
         // Chưa đăng nhập -> đá sang trang đăng nhập
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login');
         }
 
         // Đăng nhập rồi nhưng không phải admin -> chặn với lỗi 403
-        if (!auth()->user()->is_admin) {
+        if (! auth()->user()->is_admin) {
             abort(403, 'Chỉ quản trị viên mới được truy cập khu vực này.');
         }
 

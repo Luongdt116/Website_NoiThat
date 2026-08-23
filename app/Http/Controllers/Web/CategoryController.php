@@ -35,6 +35,7 @@ class CategoryController extends Controller
         $data['slug'] = $data['slug'] ?? Str::slug($data['name']);
 
         Category::create($data);
+
         return redirect()->route('admin.categories.index')->with('success', 'Đã thêm danh mục.');
     }
 
@@ -56,6 +57,7 @@ class CategoryController extends Controller
         $data['slug'] = $data['slug'] ?? Str::slug($data['name']);
 
         $category->update($data);
+
         return redirect()->route('admin.categories.index')->with('success', 'Đã cập nhật danh mục.');
     }
 
@@ -63,6 +65,7 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         Category::findOrFail($id)->delete();
+
         return redirect()->route('admin.categories.index')->with('success', 'Đã xóa danh mục.');
     }
 }

@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Services;
+
 use App\Repositories\ProductRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -7,6 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 class ProductSearchService
 {
     public function __construct(private ProductRepository $repo) {}
+
     public function run($kw, $cat, $material, $min, $max): LengthAwarePaginator
     {
         return $this->repo->search($kw, $cat, $material, $min, $max);
