@@ -65,17 +65,17 @@ Người dùng đã đồng ý: làm liên tục, không cần hỏi từng bư�
 
 ## 4. Việc tiếp theo (theo thứ tự ưu tiên)
 
-### 🔴 Ưu tiên 1 — Đưa code sang nhánh `Nhu_Kien` và `Phan_Kiet` (yêu cầu của Lương, chưa làm)
+### 🔴 ~~Ưu tiên 1~~ ✅ ĐÃ XONG (phiên 4) — Code đã sang nhánh `Nhu_Kien` và `Phan_Kiet`
 
-User muốn 2 thành viên kia có code để tự làm commit trên nhánh của mình. Trạng thái đã kiểm tra:
-`origin/Nhu_Kien` và `origin/Phan_Kiet` **đã tồn tại trên GitHub nhưng dừng ở Initial commit** (`a5c8668`, giống `main`).
-Cần hỏi lại user trước khi đẩy vì có 2 cách làm, user chưa chốt:
+Đã chọn **cách A** và đẩy xong (23/08/2026): cả `Nhu_Kien` lẫn `Phan_Kiet` giờ chạy cùng commit `58aad15`
+với `Duc_Luong` (fast-forward từ Initial commit `a5c8668`, không ghi đè gì). CI tự chạy trên cả 2 nhánh
+(cùng SHA với bản đã xanh trên `Duc_Luong`).
 
-- **Cách A (đề xuất)**: đẩy full code `Duc_Luong` lên cả 2 nhánh (`git push origin Duc_Luong:Nhu_Kien` + `Duc_Luong:Phan_Kiet`). Sau đó Kiên/Kiệt checkout nhánh mình, cấu hình git account cá nhân và tự commit phần việc (Kiên: Auth/API/Seeder/test backend; Kiệt: views/UI/Blade). Lịch sử commit trung thực, merge về sau dễ.
-- **Cách B**: chia sẵn commit theo vai trò trên từng nhánh, gắn tên tác giả tương ứng — cần email/username GitHub của Kiên và Kiệt.
-
-LƯU Ý: đẩy code sang nhánh người khác = thay đổi repo chung; nếu user nói "làm đi" thì cứ đẩy thẳng (fast-forward từ Initial commit nên an toàn, không ghi đè gì).
-Kế hoạch làm việc sau khi đẩy: xem `PHAN-CONG.md` ở gốc repo (tiếp sức 4 giai đoạn, tránh xung đột merge).
+**Việc của Kiên & Kiệt từ giờ** (hướng dẫn chi tiết trong `PHAN-CONG.md` ở gốc repo):
+1. `git clone https://github.com/Luongdt116/Website_NoiThat.git` → checkout nhánh của mình (`Nhu_Kien` / `Phan_Kiet`)
+2. Cấu hình git account CỦA CHÍNH MÌNH: `git config user.name "Tên"` + `git config user.email "email-GitHub-của-bạn"`
+3. Làm phần việc theo giai đoạn tiếp sức trong `PHAN-CONG.md`: Kiên trước (GĐ1 backend lõi), Kiệt đợi GĐ3 (sau khi Lương merge GĐ2)
+4. Commit nhỏ + đều tay bằng tài khoản thật — lịch sử commit là bằng chứng công việc
 
 ### 🟡 Ưu tiên 2 — PR `Duc_Luong` → `main` (khi nhóm thống nhất)
 
