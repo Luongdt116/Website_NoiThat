@@ -81,51 +81,14 @@ CI đang xanh (11 tests pass) nên PR sẽ pass checks. Có thể tạo bằng:
 - [ ] Quay video demo các luồng chính (yêu cầu đồ án): duyệt/lọc → đăng nhập → giỏ → đặt hàng → admin duyệt đơn. Tài khoản demo: admin@furniture.test / user@furniture.test (password) — xem `resources/accounts.md`
 - [ ] Checklist nộp: Proposal `.docx` ✅ · Báo cáo `.docx` ✅ · sơ đồ UML ✅ · video ⏳ · deploy (nếu yêu cầu) ⏳
 
-### 🟣 Ưu tiên 4 — Cải tiến ghi nhận từ Lương (2026-08-23, chưa làm — làm theo thứ tự dưới)
+### 🟣 Ưu tiên 4 — Cải tiến ghi nhận từ Lương ✅ ĐÃ XONG HẾT (phiên 3, commit `37713ea`)
 
-#### 4a. Footer lơ lửng trên trang ngắn (Giỏ hàng, Đơn của tôi)
+- [x] **4a. Footer bám đáy**: body `d-flex flex-column min-vh-100` + main `flex-grow-1` + footer `mt-auto` — trang ngắn (Giỏ hàng/Đơn của tôi) footer không còn lơ lửng
+- [x] **4b. Xung đột tồn kho**: SELECT sản phẩm trong transaction có `lockForUpdate()` (chặn âm kho khi 2 đơn song song); exception riêng `OutOfStockException`; controller tự dọn giỏ khi hết hàng (hết hẳn → xóa dòng, còn ít → giảm số lượng về mức kho); view giỏ có badge đỏ vượt kho + disable nút đặt; +2 test cạnh tranh kho
+- [x] **4c. Trang Tài khoản** `/tai-khoan`: ProfileController (đổi tên/email unique trừ chính mình, đổi mật khẩu cần mật khẩu hiện tại), view 2 card tông wood, link trong dropdown navbar, +5 test ProfileTest
+- Tests sau cả 3 mục: **18 passed / 45 assertions**, pint passed
+- Chưa làm (tùy chọn, khỏi scope nếu nặng): prefill địa chỉ/SĐT mặc định từ profile vào form đặt hàng (cần migration thêm cột users)
 
-Footer trong `layouts/app.blade.php:105` nằm ngay sau `<main>` nên với trang ít nội dung
-(nội dung không đủ chiều cao màn hình), footer lơ lửng giữa trang thay vì bám đáy.
-**Fix đề xuất (sticky footer bằng flexbox, KHÔNG dùng position:fixed vì sẽ đè nội dung):**
-- Trên `<body>`: thêm class `d-flex flex-column min-vh-100`
-- Trên `<main>`: thêm `flex-grow-1`
-- Kiểm tra lại cả trang dài (trang chủ, danh sách SP) để chắc footer vẫn xuống đúng chỗ.
-
-#### 4b. Xung đột tồn kho: người B mua mất món cuối trước khi A chốt đơn
-
-Tình huống: giỏ của A còn sản phẩm X (kho = 1); B chốt đơn nhanh tay hơn → đến lượt A
-đặt thì hàng đã hết. Hiện trạng code (`app/Services/OrderService.php::createFromCart`):
-có DB::transaction nhưng **SELECT sản phẩm chưa có `lockForUpdate()`** → 2 request đặt
-song song đều đọc được stock cũ rồi cùng trừ → **kho âm**. Ngoài ra khi fail, dòng giỏ
-cũ vẫn nằm nguyên trong giỏ của A mà không được xử lý gì.
-
-**Việc cần làm:**
-1. Chống âm kho: trong transaction của `createFromCart()`, thay
-   `$this->products->find($item['product_id'])` bằng
-   `Product::whereKey($item['product_id'])->lockForUpdate()->first()` — khóa dòng sản phẩm
-   để request sau phải đợi, đọc stock mới nhất.
-2. Xử lý giỏ khi fail hết hàng (UX): bắt Exception thiếu hàng ở `OrderController::store`,
-   xóa/điều chỉnh dòng giỏ không còn đủ hàng rồi flash message rõ ràng kiểu
-   "Sản phẩm 'X' vừa được khách khác mua hết (còn N), đã xóa khỏi giỏ của bạn".
-3. Bonus (nếu kịp): khi render trang giỏ `cart/index.blade.php`, so `quantity` từng dòng
-   với `stock` mới nhất — badge cảnh báo đỏ cho dòng vượt kho + nút "Cập nhật giỏ".
-4. Thêm test: đặt đồng thời 2 đơn cạnh tranh (mock hoặc gọi service 2 lần) → kho không âm,
-   đơn sau nhận lỗi thân thiện.
-
-#### 4c. Trang Thông tin tài khoản (Profile) — tính năng hoàn toàn mới
-
-Hiện user không thể tự cập nhật thông tin (dropdown navbar chỉ có Đăng xuất).
-**Việc cần làm:**
-1. Route GET/PUT `/tai-khoan` → `ProfileController@show / update` (middleware auth).
-2. Form cập nhật: họ tên, email (validate `unique:users,email,{id}` trừ chính mình),
-   đổi mật khẩu (nhập mật khẩu hiện tại đúng mới cho đổi; xác nhận mật khẩu mới 2 lần).
-3. Lưu địa chỉ/SĐT mặc định để điền sẵn khi đặt hàng → cần migration thêm cột
-   `address`, `phone` nullable vào bảng `users` + sửa `OrderController::create` prefill.
-   *(Cân nhắc scope: nếu thấy nặng thì bỏ mục này, giữ 1+2 là đủ đồ án.)*
-4. Thêm link "Tài khoản của tôi" vào dropdown tên user ở navbar (`layouts/app.blade.php:61`).
-5. Test: đổi email trùng email người khác → báo lỗi; đổi mật khẩu sai mật khẩu hiện tại → chặn;
-   đổi thành công → đăng nhập lại bằng mật khẩu mới được.
 
 ### Lệnh hay dùng
 
