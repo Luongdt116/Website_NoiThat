@@ -15,7 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
-        with: { php-version: '8.3', extensions: pdo_mysql, sqlite3, pdo_sqlite }
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, sqlite3, pdo_sqlite
       # Laravel 11 đã hết hạn bảo trì bảo mật → composer chặn cài vì security advisories.
       # Tắt advisory blocking ngay trong CI (không phụ thuộc config global máy ai).
       - name: Cho phép cài laravel/framework 11.x (tắt advisory blocking)
