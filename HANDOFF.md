@@ -50,7 +50,7 @@ Người dùng đã đồng ý: làm liên tục, không cần hỏi từng bư�
 1. ~~CI đỏ~~ ✅ ĐÃ SỬA XONG (xem mục 2). Nếu CI lại đỏ trong tương lai: lấy log bằng git credential (`git credential-manager get` với protocol/host github.com) rồi gọi API `/actions/jobs/{job_id}/logs` — annotations công khai chỉ nói "exit code 2" không đủ.
 2. **Composer global trên máy này vẫn tắt advisory blocking** — ai clone về máy khác chạy `composer install` lần đầu sẽ gặp lỗi resolve; CI đã tự tắt advisory nên không ảnh hưởng GitHub Actions.
 3. **Server `php artisan serve` (port 8000)** cần chạy lại thủ công nếu máy vừa mở.
-4. **Tài liệu .docx sinh từ template chung** — chưa điền thông tin cá nhân (tên SV, MSSV, lớp, GVHD) nếu đề bài yêu cầu.
+4. ~~Tài liệu .docx sinh từ template chung — chưa điền thông tin cá nhân~~ ✅ ĐÃ XONG (phiên 3): Proposal + Báo cáo đã điền 3 thành viên + GVHD + phân công 10 tuần qua `scripts/fill_proposal.py`.
 
 ## 4. Việc tiếp theo (theo thứ tự ưu tiên)
 
@@ -58,8 +58,8 @@ Người dùng đã đồng ý: làm liên tục, không cần hỏi từng bư�
 - [x] ~~Nâng cấp view `products/show.blade.php`~~ ✅
 - [x] ~~Đẹp hơn view `admin/users/index.blade.php`~~ ✅
 - [x] ~~Thay mật khẩu thật trong README.md~~ ✅
+- [x] **(phiên 3)** Điền thông tin nhóm + phân công vào Proposal/Báo cáo `.docx` từ file gốc "Website ban do noi that.docx" — commit `1df173e`
 - [ ] Khi nhóm thống nhất: tạo PR `Duc_Luong` → `main` (hiện `main` vẫn chỉ có Initial commit)
-- [ ] Điền thông tin cá nhân/nhóm vào Proposal + Báo cáo `.docx` trong `docs/`
 - [ ] Quay video demo các luồng chính (yêu cầu đồ án): duyệt/lọc → đăng nhập → giỏ → đặt hàng → admin duyệt đơn
 
 ### Lệnh hay dùng
