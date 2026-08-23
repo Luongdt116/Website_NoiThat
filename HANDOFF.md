@@ -1,7 +1,7 @@
 # 📋 HANDOFF — Ghi chú chuyển tiếp giữa các phiên làm việc
 
 > File này dành cho **phiên Claude Code tiếp theo** (hoặc thành viên nhóm) đọc để nắm trạng thái dự án,
-> các lỗi còn tồn đọng và việc cần làm. Cập nhật lần cuối: **2026-08-23** (phiên 4: giỏ tick chọn món ✅ · tài liệu phân công dạng bảng sprint ✅ · skill chống rủi ro ✅).
+> các lỗi còn tồn đọng và việc cần làm. Cập nhật lần cuối: **2026-08-23** (phiên 5: trang chủ theo block ✅ · khuyến mãi + giảm giá ✅ · footer chính sách ✅).
 
 ---
 
@@ -54,6 +54,12 @@ Người dùng đã đồng ý: làm liên tục, không cần hỏi từng bư�
 - [x] **(phiên 4)** `PHAN-CONG.md` ở gốc repo — kế hoạch tiếp sức 4 giai đoạn (Kiên backend → Lương merge+logic → Kiệt UI → Lương tổng hợp), quy ước commit, cheat sheet Git — commit `4461286`
 - [x] **(phiên 4)** Tài liệu phân công NGOÀI repo (`D:\WORK\NAM4\3_CDTH\`, KHÔNG git-commit): `Mota_Jira_new.docx` + `PHAN_CONG.docx` dạng BẢNG theo Sprint (43 task + 100 subtask, owner khớp Proposal, hạn commit đỏ). Sinh lại bằng script `gen_assignment_docs.py` cùng thư mục (dữ liệu chuẩn nhúng sẵn trong script)
 - [x] **(phiên 4)** Cập nhật skill `furniture-web`: thêm mục "⚠️ Quy tắc chống rủi ro" vào SKILL.md; script mới `build_assignment_docs.py` thay `build_mota_jira.py` (ĐÃ XÓA vì dữ liệu lệch); đồng bộ template đặt hàng trong `scaffold_laravel.py` (lockForUpdate, OutOfStockException, hoàn kho khi hủy, giỏ tick chọn) — PHP lint sạch
+- [x] **(phiên 5)** Tính năng giảm giá + trang chủ theo block + footer chính sách (commit `3dc7901`):
+  - **Giảm giá**: cột `products.discount_percent` (migration 000008), accessor `final_price` (làm tròn nghìn), badge `-N%` + giá gốc gạch ngang ở product-card/show/cart; admin nhập % giảm trong form SP; đơn hàng chốt theo giá sau giảm (`OrderService` dùng `final_price`) — test riêng xác nhận total 800.000₫ cho 2×500.000₫ giảm 20%
+  - **Trang chủ mới** (`HomeController`, view `home.blade.php`): hero banner + 3 block — Gợi ý hôm nay (random), Sản phẩm bán chạy (SUM quantity trong order_items), Sản phẩm giá rẻ (giá sau giảm thấp nhất); mỗi block 8 SP
+  - **Trang khuyến mãi** `/khuyen-mai`: chỉ SP đang giảm, sắp giảm nhiều trước, có phân trang; link trên navbar
+  - **Footer 4 cột**: giới thiệu cửa hàng + liên hệ, link 3 chính sách `/chinh-sach/{doi-tra|giao-hang|bao-mat}` (PageController + `pages/show.blade.php`), hướng dẫn mua hàng, COD/giao toàn quốc
+  - Seeder gán giảm giá mẫu 7/12 sản phẩm; tests **20 → 27 passed / 84 assertions**, pint passed
 
 ## 3. ⚠️ Lỗi/rủi ro còn tồn đọng
 
@@ -101,7 +107,7 @@ CI đang xanh (11 tests pass) nên PR sẽ pass checks. Có thể tạo bằng:
 ```bash
 cd /d/WORK/NAM4/3_CDTH/Website_NoiThat
 php artisan serve                      # chạy web :8000
-php artisan test                       # 20 tests / 57 assertions (SQLite :memory:)
+php artisan test                       # 27 tests / 84 assertions (SQLite :memory:)
 php artisan migrate:fresh --seed      # reset dữ liệu demo
 ./vendor/bin/pint                     # auto-fix style code
 # Sinh lại tài liệu:
