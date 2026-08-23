@@ -14,14 +14,14 @@ class OrderController extends Controller
 {
     public function __construct(private OrderService $orders, private CartService $cart) {}
 
-    // Trang thanh toán: hiển thị tóm tắt giỏ + form địa chỉ/SĐT
+    // Trang thanh toán: hiển thị tóm tắt các món ĐƯỢC TICK + form địa chỉ/SĐT
     public function checkout()
     {
-        $items = $this->cart->items(auth()->id());
+        $items = $this->cart->selectedItems(auth()->id());
 
-        // Giỏ trống thì không cho vào trang thanh toán
+        // Chưa tick món nào thì quay lại giỏ để chọn
         if ($items->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống, hãy thêm sản phẩm trước.');
+            return redirect()->route('cart.index')->with('error', 'Hãy chọn ít nhất một sản phẩm trong giỏ để đặt hàng.');
         }
 
         return view('orders.checkout', ['items' => $items]);
@@ -30,7 +30,8 @@ class OrderController extends Controller
     // Lưu đơn: bọc transaction trong OrderService, trừ tồn kho, xóa giỏ
     public function store(Request $r)
     {
-        $items = $this->cart->items(auth()->id())
+        // Chỉ những món được tick mới tạo thành đơn; món không tick ở lại giỏ
+        $items = $this->cart->selectedItems(auth()->id())
             ->map(fn ($i) => ['product_id' => $i->product_id, 'quantity' => $i->quantity])
             ->toArray();
 
@@ -39,7 +40,8 @@ class OrderController extends Controller
                 'address' => 'required|string|max:500',
                 'phone' => 'required|string|max:20',
             ]));
-            $this->cart->clear(auth()->id()); // xóa giỏ sau khi đặt thành công
+            // Xóa CHỈ các món đã đặt khỏi giỏ — món không tick giữ nguyên cho lần sau
+            Cart::where('user_id', auth()->id())->where('selected', true)->delete();
 
             return redirect()->route('orders.show', $order->id)->with('success', 'Đặt hàng thành công! Chúng tôi sẽ liên hệ bạn sớm.');
         } catch (OutOfStockException $e) {

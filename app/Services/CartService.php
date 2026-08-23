@@ -13,6 +13,18 @@ class CartService
         return $this->repo->items($userId);
     }
 
+    // Chỉ những món được tick — dùng khi đặt hàng
+    public function selectedItems(int $userId)
+    {
+        return $this->repo->selectedItems($userId);
+    }
+
+    // Tick/bỏ tick 1 dòng giỏ
+    public function setSelected(int $id, bool $selected): void
+    {
+        $this->repo->setSelected($id, $selected);
+    }
+
     public function add(int $userId, int $pid, int $qty)
     {
         return $this->repo->add($userId, $pid, $qty);

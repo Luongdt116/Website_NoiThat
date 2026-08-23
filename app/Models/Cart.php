@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cart extends Model
 {
-    protected $fillable = ['user_id', 'product_id', 'quantity'];
+    protected $fillable = ['user_id', 'product_id', 'quantity', 'selected'];
+
+    protected $casts = [
+        'selected' => 'boolean',
+    ];
 
     public function product(): BelongsTo
     {

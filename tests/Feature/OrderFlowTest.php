@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
@@ -9,7 +10,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// Test luồng nghiệp vụ cốt lõi: giỏ hàng → đặt hàng → tồn kho giảm → admin duyệt
+// Test luồng nghiệp vụ cốt lõi: giỏ hàng (tick chọn món) → đặt hàng → tồn kho giảm → admin duyệt
 class OrderFlowTest extends TestCase
 {
     use RefreshDatabase;
@@ -218,6 +219,67 @@ class OrderFlowTest extends TestCase
         $this->assertDatabaseCount('orders', 0);
         $this->assertDatabaseCount('carts', 0);
         $this->assertDatabaseHas('products', ['id' => $this->product->id, 'stock' => 0]);
+    }
+
+    /**
+     * Bỏ tick một món trong giỏ rồi đặt hàng: chỉ món ĐƯỢC TICK vào đơn,
+     * món bỏ tick ở lại giỏ cho lần mua sau.
+     */
+    public function test_only_selected_items_go_into_order(): void
+    {
+        $this->actingAs($this->user);
+        // Thêm 2 món khác nhau
+        $other = Product::create([
+            'name' => 'Bàn test', 'price' => 2000000, 'stock' => 5, 'category_id' => $this->product->category_id,
+        ]);
+        $this->post('/gio-hang/them', ['product_id' => $this->product->id, 'quantity' => 1]);
+        $this->post('/gio-hang/them', ['product_id' => $other->id, 'quantity' => 2]);
+
+        // Bỏ tick món ghế
+        $chairLine = Cart::where('user_id', $this->user->id)->where('product_id', $this->product->id)->first();
+        $this->post("/gio-hang/{$chairLine->id}/chon", ['selected' => 0]);
+
+        // Đặt hàng
+        $response = $this->post('/don-hang', ['address' => 'addr', 'phone' => '0900000000']);
+        $response->assertSessionHas('success');
+
+        // Đơn CHỈ chứa bàn (2 × 2.000.000), không chứa ghế
+        $orderId = Order::where('user_id', $this->user->id)->value('id');
+        $this->assertDatabaseHas('orders', ['id' => $orderId, 'total' => '4000000.00']);
+        $this->assertDatabaseHas('order_items', ['order_id' => $orderId, 'product_id' => $other->id]);
+        $this->assertDatabaseMissing('order_items', ['order_id' => $orderId, 'product_id' => $this->product->id]);
+
+        // Ghế bị bỏ tick vẫn nằm lại giỏ; bàn đã đặt bị xóa khỏi giỏ
+        $this->assertDatabaseHas('carts', [
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+            'selected' => false,
+        ]);
+        $this->assertDatabaseMissing('carts', ['product_id' => $other->id]);
+
+        // Tồn kho: ghế nguyên vẹn 10, bàn giảm 5 -> 3
+        $this->assertDatabaseHas('products', ['id' => $this->product->id, 'stock' => 10]);
+        $this->assertDatabaseHas('products', ['id' => $other->id, 'stock' => 3]);
+    }
+
+    /**
+     * Bỏ tick hết mọi món thì không đặt được hàng (chặn đơn rỗng).
+     */
+    public function test_cannot_order_when_nothing_selected(): void
+    {
+        $this->actingAs($this->user);
+        $this->post('/gio-hang/them', ['product_id' => $this->product->id, 'quantity' => 1]);
+
+        $line = Cart::where('user_id', $this->user->id)->first();
+        $this->post("/gio-hang/{$line->id}/chon", ['selected' => 0]);
+
+        // Trang thanh toán từ chối khi không có món được chọn
+        $this->get('/thanh-toan')->assertRedirect(route('cart.index'));
+
+        // POST trực tiếp cũng bị chặn (giỏ trống theo nghĩa "không có món được tick")
+        $this->post('/don-hang', ['address' => 'addr', 'phone' => '0900000000'])
+            ->assertSessionHas('error');
+        $this->assertDatabaseCount('orders', 0);
     }
 
     /**

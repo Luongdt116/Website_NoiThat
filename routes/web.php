@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
     Route::post('/gio-hang/them', [CartController::class, 'add'])->name('cart.add');
     Route::post('/gio-hang/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/gio-hang/{id}/chon', [CartController::class, 'select'])->name('cart.select');
     Route::get('/gio-hang/xoa/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
     // ===== Đặt hàng (COD mô phỏng) =====

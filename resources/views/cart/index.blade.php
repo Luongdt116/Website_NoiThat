@@ -6,6 +6,8 @@
 @php
     // Dòng giỏ vượt tồn kho hiện tại (có thể do khách khác mua mất một phần)
     $overStock = $items->filter(fn($i) => $i->product && $i->quantity > $i->product->stock);
+    // Chỉ món được tick mới tính vào tóm tắt + đặt hàng
+    $checked = $items->filter(fn($i) => $i->selected);
 @endphp
 <h2 class="text-wood mb-4"><i class="bi bi-cart3"></i> Giỏ hàng của bạn</h2>
 
@@ -22,12 +24,23 @@
             <div>Một số sản phẩm trong giỏ vừa giảm số lượng còn lại trong kho (khách khác đã mua trước). Hãy cập nhật lại số lượng trước khi đặt hàng.</div>
         </div>
     @endif
+    {{-- Chọn tất cả --}}
+    <div class="form-check mb-3 ms-1">
+        <input class="form-check-input" type="checkbox" id="check-all"
+               {{ $checked->count() === $items->count() ? 'checked' : '' }}>
+        <label class="form-check-label fw-bold" for="check-all">
+            Chọn tất cả ({{ $items->count() }} sản phẩm)
+        </label>
+    </div>
     <div class="row g-4">
         {{-- Danh sách sản phẩm trong giỏ --}}
         <div class="col-lg-8">
             @foreach($items as $i)
                 <div class="card mb-3 {{ $i->product && $i->quantity > $i->product->stock ? 'border-danger' : '' }}">
                     <div class="card-body d-flex align-items-center gap-3">
+                        {{-- Tick chọn món nào sẽ thanh toán --}}
+                        <input class="form-check-input item-check flex-shrink-0" type="checkbox" style="width:1.25rem;height:1.25rem"
+                               data-id="{{ $i->id }}" aria-label="Chọn {{ $i->product?->name }}" {{ $i->selected ? 'checked' : '' }}>
                         {{-- Ảnh nhỏ hoặc icon placeholder --}}
                         <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:80px;height:80px;flex-shrink:0">
                             @if($i->product->image)
@@ -58,14 +71,14 @@
             @endforeach
         </div>
 
-        {{-- Tóm tắt đơn hàng --}}
+        {{-- Tóm tắt đơn hàng: chỉ tính món đang được tick --}}
         <div class="col-lg-4">
             <div class="card p-4 sticky-top" style="top:90px">
                 <h5>Tóm tắt đơn hàng</h5>
-                @php $total = $items->sum(fn($i) => $i->product->price * $i->quantity); @endphp
+                @php $total = $checked->sum(fn($i) => $i->product->price * $i->quantity); @endphp
                 <div class="d-flex justify-content-between mt-3">
-                    <span class="text-muted">Sản phẩm:</span>
-                    <span>{{ $items->sum('quantity') }}</span>
+                    <span class="text-muted">Sản phẩm được chọn:</span>
+                    <span>{{ $checked->sum('quantity') }} / {{ $items->sum('quantity') }}</span>
                 </div>
                 <div class="d-flex justify-content-between mt-2 fs-5">
                     <span class="fw-bold">Tạm tính:</span>
@@ -78,6 +91,12 @@
                         <i class="bi bi-truck"></i> Tiến hành đặt hàng (COD)
                     </button>
                     <div class="text-danger small mt-1 text-center"><i class="bi bi-info-circle"></i> Cập nhật số lượng trước khi đặt hàng</div>
+                @elseif($checked->isEmpty())
+                    {{-- Chưa tick món nào thì không có gì để đặt --}}
+                    <button class="btn btn-wood w-100" disabled>
+                        <i class="bi bi-truck"></i> Tiến hành đặt hàng (COD)
+                    </button>
+                    <div class="text-muted small mt-1 text-center"><i class="bi bi-info-circle"></i> Hãy chọn ít nhất một sản phẩm để đặt</div>
                 @else
                     <a href="{{ route('orders.checkout') }}" class="btn btn-wood w-100"><i class="bi bi-truck"></i> Tiến hành đặt hàng (COD)</a>
                 @endif
@@ -85,5 +104,36 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        // Gửi tick/bỏ tick lên server ngay khi bấm checkbox (AJAX, giữ nguyên vị trí trang)
+        document.querySelectorAll('.item-check').forEach(function (box) {
+            box.addEventListener('change', function () {
+                fetch('{{ url('gio-hang') }}/' + this.dataset.id + '/chon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ selected: this.checked ? 1 : 0 }),
+                }).then(function (res) {
+                    if (res.ok) { location.reload(); }   // reload để tóm tắt tiền cập nhật
+                });
+            });
+        });
+        // Nút "Chọn tất cả": tick/bỏ tick mọi dòng rồi lưu lên server lần lượt
+        var checkAll = document.getElementById('check-all');
+        if (checkAll) {
+            checkAll.addEventListener('change', function () {
+                var boxes = document.querySelectorAll('.item-check');
+                var target = this.checked;
+                boxes.forEach(function (b) { if (b.checked !== target) b.click(); });
+            });
+        }
+    </script>
+    @endpush
 @endif
 @endsection
