@@ -51,7 +51,16 @@
                         </div>
                         <div class="flex-grow-1">
                             <a href="{{ route('products.show', $i->product->id) }}" class="text-decoration-none text-dark fw-bold">{{ $i->product->name }}</a>
-                            <div class="text-muted small">{{ number_format($i->product->price, 0, ',', '.') }} ₫ / sản phẩm</div>
+                            {{-- Giá đơn vị: hiện giá sau giảm nếu sản phẩm đang sale --}}
+                            @if($i->product->hasDiscount())
+                                <div class="small">
+                                    <span class="text-decoration-line-through text-muted">{{ number_format($i->product->price, 0, ',', '.') }} ₫</span>
+                                    <span class="fw-bold text-danger">{{ number_format($i->product->final_price, 0, ',', '.') }} ₫</span>
+                                    <span class="badge bg-danger ms-1">-{{ $i->product->discount_percent }}%</span> / sản phẩm
+                                </div>
+                            @else
+                                <div class="text-muted small">{{ number_format($i->product->price, 0, ',', '.') }} ₫ / sản phẩm</div>
+                            @endif
                             @if($i->quantity > $i->product->stock)
                                 <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Chỉ còn {{ $i->product->stock }} trong kho</span>
                             @endif
@@ -62,8 +71,8 @@
                             <input type="number" name="quantity" value="{{ $i->quantity }}" min="1" max="{{ $i->product->stock }}" class="form-control" style="width:90px">
                             <button class="btn btn-outline-secondary btn-sm">Cập nhật</button>
                         </form>
-                        <div class="text-wood fw-bold" style="min-width:120px;text-align:right">
-                            {{ number_format($i->product->price * $i->quantity, 0, ',', '.') }} ₫
+                        <div class="{{ $i->product->hasDiscount() ? 'text-danger' : 'text-wood' }} fw-bold" style="min-width:120px;text-align:right">
+                            {{ number_format($i->product->final_price * $i->quantity, 0, ',', '.') }} ₫
                         </div>
                         <a href="{{ route('cart.remove', $i->id) }}" class="btn btn-outline-danger btn-sm" title="Xóa"><i class="bi bi-trash"></i></a>
                     </div>
@@ -75,7 +84,8 @@
         <div class="col-lg-4">
             <div class="card p-4 sticky-top" style="top:90px">
                 <h5>Tóm tắt đơn hàng</h5>
-                @php $total = $checked->sum(fn($i) => $i->product->price * $i->quantity); @endphp
+                {{-- Tạm tính theo GIÁ SAU GIẢM — khớp với số tiền OrderService chốt khi đặt --}}
+                @php $total = $checked->sum(fn($i) => $i->product->final_price * $i->quantity); @endphp
                 <div class="d-flex justify-content-between mt-3">
                     <span class="text-muted">Sản phẩm được chọn:</span>
                     <span>{{ $checked->sum('quantity') }} / {{ $items->sum('quantity') }}</span>

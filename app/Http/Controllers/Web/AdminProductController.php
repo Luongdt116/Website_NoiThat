@@ -16,6 +16,7 @@ class AdminProductController extends Controller
         'name' => 'required|string|max:255',
         'description' => 'nullable|string',
         'price' => 'required|numeric|min:0',
+        'discount_percent' => 'nullable|integer|min:0|max:90',
         'stock' => 'required|integer|min:0',
         'material' => 'nullable|string|max:255',
         'category_id' => 'required|exists:categories,id',

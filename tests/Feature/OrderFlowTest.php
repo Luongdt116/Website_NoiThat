@@ -299,4 +299,45 @@ class OrderFlowTest extends TestCase
 
         $this->assertDatabaseHas('products', ['id' => $this->product->id, 'stock' => 10]);
     }
+
+    /**
+     * Đặt hàng khi sản phẩm đang giảm giá: đơn chốt theo GIÁ SAU GIẢM.
+     */
+    public function test_order_uses_discounted_price(): void
+    {
+        $this->actingAs($this->user);
+        // Ghế test 500.000₫ giảm 20% → giá bán 400.000₫
+        $this->product->update(['discount_percent' => 20]);
+
+        $this->post('/gio-hang/them', ['product_id' => $this->product->id, 'quantity' => 2]);
+        $this->post('/don-hang', ['address' => 'addr', 'phone' => '0900000000']);
+
+        // Tổng đơn = 2 × 400.000 = 800.000 (không phải 1.000.000 theo giá gốc)
+        $orderId = Order::where('user_id', $this->user->id)->value('id');
+        $this->assertDatabaseHas('orders', ['id' => $orderId, 'total' => '800000.00']);
+        // Dòng order_items cũng ghi giá sau giảm để đối soát
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $orderId,
+            'price' => '400000.00',
+        ]);
+    }
+
+    /**
+     * Trang khuyến mãi chỉ liệt kê sản phẩm đang giảm giá.
+     */
+    public function test_sale_page_lists_only_discounted_products(): void
+    {
+        $this->product->update(['discount_percent' => 20]);
+        $full = Product::create([
+            'name' => 'Bàn không giảm', 'price' => 3000000, 'stock' => 5,
+            'category_id' => $this->product->category_id,
+        ]);
+
+        $response = $this->get(route('home.sale'));
+
+        $response->assertOk();
+        $response->assertSee('Khuyến mãi hôm nay');
+        $response->assertSee($this->product->name);
+        $response->assertDontSee($full->name);
+    }
 }

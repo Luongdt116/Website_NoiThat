@@ -6,7 +6,9 @@ use App\Http\Controllers\Web\AdminProductController;
 use App\Http\Controllers\Web\AdminUserController;
 use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\CategoryController;
+use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\OrderController;
+use App\Http\Controllers\Web\PageController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -19,12 +21,18 @@ use Illuminate\Support\Facades\Route;
 | Admin: quản trị danh mục/sản phẩm/đơn/user/dashboard (prefix /admin).
 */
 
-// Trang chủ: tái dùng trang danh sách sản phẩm (có tìm kiếm/lọc)
-Route::get('/', [ProductController::class, 'index'])->name('home');
+// Trang chủ: các block Gợi ý / Bán chạy / Giá rẻ (HomeController)
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // ===== Sản phẩm (khách + user) =====
 Route::get('/san-pham', [ProductController::class, 'index'])->name('products.index');
 Route::get('/san-pham/{id}', [ProductController::class, 'show'])->name('products.show');
+
+// ===== Khuyến mãi: sản phẩm đang giảm giá =====
+Route::get('/khuyen-mai', [HomeController::class, 'sale'])->name('home.sale');
+
+// ===== Trang tĩnh: chính sách cửa hàng =====
+Route::get('/chinh-sach/{slug}', [PageController::class, 'show'])->name('pages.show');
 
 // ===== Giỏ hàng (cần đăng nhập) =====
 Route::middleware('auth')->group(function () {

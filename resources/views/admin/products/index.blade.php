@@ -10,7 +10,7 @@
 
 <table class="table bg-white shadow-sm align-middle">
     <thead class="table-light">
-        <tr><th>Ảnh</th><th>Tên</th><th>Danh mục</th><th>Giá</th><th>Tồn kho</th><th>Chất liệu</th><th width="160">Thao tác</th></tr>
+        <tr><th>Ảnh</th><th>Tên</th><th>Danh mục</th><th>Giá gốc</th><th>Giảm giá</th><th>Tồn kho</th><th>Chất liệu</th><th width="160">Thao tác</th></tr>
     </thead>
     <tbody>
     @forelse($products as $p)
@@ -28,6 +28,14 @@
             <td>{{ $p->category->name ?? '—' }}</td>
             <td>{{ number_format($p->price, 0, ',', '.') }} ₫</td>
             <td>
+                @if($p->hasDiscount())
+                    <span class="badge bg-danger">-{{ $p->discount_percent }}%</span>
+                    <div class="small text-muted">còn {{ number_format($p->final_price, 0, ',', '.') }} ₫</div>
+                @else
+                    <span class="text-muted">—</span>
+                @endif
+            </td>
+            <td>
                 {{-- Tồn kho thấp (<5) tô đỏ để admin chú ý nhập thêm --}}
                 <span class="badge {{ $p->stock > 5 ? 'bg-success' : ($p->stock > 0 ? 'bg-warning text-dark' : 'bg-danger') }}">
                     {{ $p->stock }}
@@ -43,7 +51,7 @@
             </td>
         </tr>
     @empty
-        <tr><td colspan="7" class="text-center text-muted py-4">Chưa có sản phẩm nào.</td></tr>
+        <tr><td colspan="8" class="text-center text-muted py-4">Chưa có sản phẩm nào.</td></tr>
     @endforelse
     </tbody>
 </table>

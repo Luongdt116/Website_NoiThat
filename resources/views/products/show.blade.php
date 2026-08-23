@@ -21,8 +21,18 @@
         <i class="bi bi-tags me-1"></i> {{ $product->category->name ?? 'Khác' }}
       </p>
 
-      {{-- Giá nổi bật --}}
-      <h4 style="color:var(--wood); font-size:1.8rem;">{{ number_format($product->price, 0, ',', '.') }} ₫</h4>
+      {{-- Giá nổi bật: giá gốc gạch ngang + giá sau giảm khi có khuyến mãi --}}
+      @if($product->hasDiscount())
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-danger fs-6">-{{ $product->discount_percent }}%</span>
+          <span class="text-decoration-line-through text-muted">{{ number_format($product->price, 0, ',', '.') }} ₫</span>
+        </div>
+        <h4 class="text-danger" style="font-size:1.8rem;">{{ number_format($product->final_price, 0, ',', '.') }} ₫
+          <small class="text-success fs-6 fw-normal">(tiết kiệm {{ number_format($product->price - $product->final_price, 0, ',', '.') }} ₫)</small>
+        </h4>
+      @else
+        <h4 style="color:var(--wood); font-size:1.8rem;">{{ number_format($product->price, 0, ',', '.') }} ₫</h4>
+      @endif
 
       {{-- Tồn kho --}}
       <p class="mb-3">

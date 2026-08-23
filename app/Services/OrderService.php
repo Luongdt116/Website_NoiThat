@@ -43,11 +43,12 @@ class OrderService
                         (int) $product->stock
                     );
                 }
-                $total += $product->price * $item['quantity'];
+                // Đơn hàng chốt theo GIÁ SAU GIẢM tại thời điểm đặt (final_price accessor)
+                $total += $product->final_price * $item['quantity'];
                 $lines[] = [
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
-                    'price' => $product->price,
+                    'price' => $product->final_price,
                 ];
                 $this->products->decreaseStock($product->id, $item['quantity']);
             }

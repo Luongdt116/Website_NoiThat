@@ -5,11 +5,15 @@
     <div class="card h-100 product-card">
         {{-- Ảnh sản phẩm hoặc placeholder nếu chưa có ảnh --}}
         <a href="{{ route('products.show', $product->id) }}" class="text-decoration-none">
-            <div class="product-img-wrapper bg-light d-flex align-items-center justify-content-center">
+            <div class="product-img-wrapper bg-light d-flex align-items-center justify-content-center position-relative">
                 @if($product->image)
                     <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" class="card-img-top product-img">
                 @else
                     <i class="bi bi-image text-secondary py-5" style="font-size:3rem"></i>
+                @endif
+                {{-- Badge giảm giá -N% đè lên ảnh --}}
+                @if($product->hasDiscount())
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6">-{{ $product->discount_percent }}%</span>
                 @endif
             </div>
         </a>
@@ -18,8 +22,15 @@
             <a href="{{ route('products.show', $product->id) }}" class="text-decoration-none text-dark">
                 <h6 class="card-title">{{ $product->name }}</h6>
             </a>
-            <p class="card-text text-wood fw-bold mt-auto mb-2">
-                {{ number_format($product->price, 0, ',', '.') }} ₫
+            {{-- Giá sau giảm nổi bật; giá gốc gạch ngang nhỏ bên cạnh nếu có giảm --}}
+            <p class="card-text mt-auto mb-2">
+                @if($product->hasDiscount())
+                    <span class="text-decoration-line-through text-muted me-1 small">{{ number_format($product->price, 0, ',', '.') }} ₫</span><br>
+                    <span class="text-danger fw-bold">{{ number_format($product->final_price, 0, ',', '.') }} ₫</span>
+                    <small class="text-success ms-1">(tiết kiệm {{ number_format($product->price - $product->final_price, 0, ',', '.') }} ₫)</small>
+                @else
+                    <span class="text-wood fw-bold">{{ number_format($product->price, 0, ',', '.') }} ₫</span>
+                @endif
             </p>
             {{-- Nút thêm giỏ: chỉ hiện khi đăng nhập; hết hàng thì vô hiệu hóa --}}
             @auth

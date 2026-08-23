@@ -20,6 +20,14 @@
         .btn-wood:hover { background-color: var(--wood-dark); border-color: var(--wood-dark); color: #fff; }
         .text-wood { color: var(--wood); }
         .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+        /* Hero banner trang chủ + footer tông gỗ */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--wood) 0%, var(--wood-dark) 100%);
+            color: #fff;
+        }
+        .footer-wood { background-color: var(--ink-footer, #3d2f22); }
+        .footer-link { color: #e8ddd0; text-decoration: none; }
+        .footer-link:hover { color: #fff; text-decoration: underline; }
     </style>
     @stack('styles')
 </head>
@@ -35,6 +43,7 @@
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">Trang chủ</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('products.index') }}">Sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link text-danger fw-semibold" href="{{ route('home.sale') }}"><i class="bi bi-percent"></i> Khuyến mãi</a></li>
             </ul>
             {{-- Thanh tìm kiếm nhanh (từ khóa) --}}
             <form class="d-flex me-lg-3" method="GET" action="{{ route('products.index') }}" role="search">
@@ -106,9 +115,50 @@
 </main>
 
 {{-- mt-auto: footer luôn bám đáy viewport (kết hợp flex-column trên body) --}}
-<footer class="border-top py-4 text-center text-muted bg-white mt-auto">
+<footer class="footer-wood text-light pt-5 pb-3 mt-auto">
     <div class="container">
-        <p class="mb-0">© {{ date('Y') }} Furniture Store — Đồ án Website bán đồ nội thất trực tuyến</p>
+        <div class="row gy-4">
+            {{-- Cột 1: Giới thiệu cửa hàng --}}
+            <div class="col-md-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-tree"></i> Furniture Store</h6>
+                <p class="text-light-emphasis small">
+                    Cửa hàng nội thất trực tuyến chuyên bàn ghế, tủ kệ, giường ngủ bằng gỗ tự nhiên
+                    và vật liệu bền đẹp. Giao hàng COD toàn quốc — khách được kiểm tra hàng trước khi thanh toán.
+                </p>
+                <p class="small mb-0 text-light-emphasis">
+                    <i class="bi bi-envelope"></i> hotro@furniture.test<br>
+                    <i class="bi bi-telephone"></i> 1900 1234 (8:00–21:00 hằng ngày)
+                </p>
+            </div>
+            {{-- Cột 2: Chính sách --}}
+            <div class="col-md-3 col-6">
+                <h6 class="fw-bold mb-3">Chính sách</h6>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-2"><a href="{{ route('pages.show', 'doi-tra') }}" class="footer-link">Chính sách đổi trả</a></li>
+                    <li class="mb-2"><a href="{{ route('pages.show', 'giao-hang') }}" class="footer-link">Chính sách giao hàng</a></li>
+                    <li><a href="{{ route('pages.show', 'bao-mat') }}" class="footer-link">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            {{-- Cột 3: Hướng dẫn mua hàng --}}
+            <div class="col-md-3 col-6">
+                <h6 class="fw-bold mb-3">Hướng dẫn</h6>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-2"><a href="{{ route('products.index') }}" class="footer-link">Duyệt sản phẩm</a></li>
+                    <li class="mb-2"><a href="{{ route('home.sale') }}" class="footer-link">Khuyến mãi hôm nay</a></li>
+                    <li><a href="{{ route('orders.history') }}" class="footer-link">Tra cứu đơn của tôi</a></li>
+                </ul>
+            </div>
+            {{-- Cột 4: Phương thức thanh toán + vận chuyển --}}
+            <div class="col-md-2">
+                <h6 class="fw-bold mb-3">Thanh toán &amp; giao nhận</h6>
+                <p class="small text-light-emphasis mb-1"><i class="bi bi-cash-stack me-1"></i>Thanh toán khi nhận hàng (COD)</p>
+                <p class="small text-light-emphasis mb-0"><i class="bi bi-truck me-1"></i>Giao toàn quốc 1–5 ngày</p>
+            </div>
+        </div>
+        <hr class="border-secondary opacity-25 my-4">
+        <p class="text-center small text-light-emphasis mb-0">
+            © {{ date('Y') }} Furniture Store — Đồ án Website bán đồ nội thất trực tuyến · Nhóm 3 thành viên · Laravel 11
+        </p>
     </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

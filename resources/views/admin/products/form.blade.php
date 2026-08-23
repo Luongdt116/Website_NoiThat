@@ -26,8 +26,19 @@
             </select>
         </div>
         <div class="col-md-4 mb-3">
-            <label class="form-label">Giá (₫) <span class="text-danger">*</span></label>
+            <label class="form-label">Giá gốc (₫) <span class="text-danger">*</span></label>
             <input name="price" type="number" step="1000" min="0" value="{{ old('price', $product->price ?? '') }}" class="form-control" required>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Giảm giá (%)</label>
+            <div class="input-group">
+                <input name="discount_percent" type="number" min="0" max="90"
+                       value="{{ old('discount_percent', $product->discount_percent ?? 0) }}" class="form-control">
+                <span class="input-group-text">%</span>
+            </div>
+            @if(isset($product) && $product->hasDiscount())
+                <div class="form-text text-success">Giá bán: {{ number_format($product->final_price, 0, ',', '.') }} ₫</div>
+            @endif
         </div>
         <div class="col-md-4 mb-3">
             <label class="form-label">Tồn kho <span class="text-danger">*</span></label>
