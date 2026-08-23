@@ -1,7 +1,7 @@
 # 📋 HANDOFF — Ghi chú chuyển tiếp giữa các phiên làm việc
 
 > File này dành cho **phiên Claude Code tiếp theo** (hoặc thành viên nhóm) đọc để nắm trạng thái dự án,
-> các lỗi còn tồn đọng và việc cần làm. Cập nhật lần cuối: **2026-08-23** (phiên 3: polish + điền thông tin nhóm vào Proposal/Báo cáo ✅).
+> các lỗi còn tồn đọng và việc cần làm. Cập nhật lần cuối: **2026-08-23** (phiên 4: giỏ tick chọn món ✅ · tài liệu phân công dạng bảng sprint ✅ · skill chống rủi ro ✅).
 
 ---
 
@@ -50,6 +50,10 @@ Người dùng đã đồng ý: làm liên tục, không cần hỏi từng bư�
   - Điền đủ **26/26 dòng "Phân công công việc"** trong 5 bảng kế hoạch 10 tuần; sửa chữ sót template khách sạn ("Room, Booking" → "Products, Orders, Cart")
   - Báo cáo: thêm khối thông tin nhóm sau tiêu đề
   - Tái tạo được qua `python scripts/fill_proposal.py` (dict `ASSIGNMENTS` trong script là nguồn chuẩn)
+- [x] **(phiên 4)** Giỏ hàng tick chọn món trước khi đặt (kiểu Shopee/Tiki) — commit `87228b8`: cột `carts.selected` (migration riêng), checkbox AJAX từng dòng + chọn tất cả, checkout/store chỉ lấy `selectedItems()`, xóa giỏ chỉ xóa món đã đặt; +2 test → **20 passed / 57 assertions**
+- [x] **(phiên 4)** `PHAN-CONG.md` ở gốc repo — kế hoạch tiếp sức 4 giai đoạn (Kiên backend → Lương merge+logic → Kiệt UI → Lương tổng hợp), quy ước commit, cheat sheet Git — commit `4461286`
+- [x] **(phiên 4)** Tài liệu phân công NGOÀI repo (`D:\WORK\NAM4\3_CDTH\`, KHÔNG git-commit): `Mota_Jira_new.docx` + `PHAN_CONG.docx` dạng BẢNG theo Sprint (43 task + 100 subtask, owner khớp Proposal, hạn commit đỏ). Sinh lại bằng script `gen_assignment_docs.py` cùng thư mục (dữ liệu chuẩn nhúng sẵn trong script)
+- [x] **(phiên 4)** Cập nhật skill `furniture-web`: thêm mục "⚠️ Quy tắc chống rủi ro" vào SKILL.md; script mới `build_assignment_docs.py` thay `build_mota_jira.py` (ĐÃ XÓA vì dữ liệu lệch); đồng bộ template đặt hàng trong `scaffold_laravel.py` (lockForUpdate, OutOfStockException, hoàn kho khi hủy, giỏ tick chọn) — PHP lint sạch
 
 ## 3. ⚠️ Lỗi/rủi ro còn tồn đọng
 
@@ -57,6 +61,7 @@ Người dùng đã đồng ý: làm liên tục, không cần hỏi từng bư�
 2. **Composer global trên máy này vẫn tắt advisory blocking** — ai clone về máy khác chạy `composer install` lần đầu sẽ gặp lỗi resolve; CI đã tự tắt advisory nên không ảnh hưởng GitHub Actions.
 3. **Server `php artisan serve` (port 8000)** cần chạy lại thủ công nếu máy vừa mở.
 4. ~~Tài liệu .docx sinh từ template chung — chưa điền thông tin cá nhân~~ ✅ ĐÃ XONG (phiên 3): Proposal + Báo cáo đã điền 3 thành viên + GVHD + phân công 10 tuần qua `scripts/fill_proposal.py`.
+5. ⚠️ **File `Mota_Jira.docx` gốc ĐÃ MẤT khỏi máy** (kiểm tra 23/08/2026: không còn ở `3_CDTH`, Downloads/Documents/Desktop, Recycle Bin). Dữ liệu chuẩn 43 task + 100 subtask (owner khớp Proposal) đã được nhúng trong `gen_assignment_docs.py` (ngoài repo) và `build_assignment_docs.py` (trong skill) nên vẫn sinh lại được. Nếu tìm lại bản gốc ở chỗ khác thì chép về `D:\WORK\NAM4\3_CDTH\` — script sẽ tự ưu tiên đọc nó.
 
 ## 4. Việc tiếp theo (theo thứ tự ưu tiên)
 
@@ -70,6 +75,7 @@ Cần hỏi lại user trước khi đẩy vì có 2 cách làm, user chưa ch�
 - **Cách B**: chia sẵn commit theo vai trò trên từng nhánh, gắn tên tác giả tương ứng — cần email/username GitHub của Kiên và Kiệt.
 
 LƯU Ý: đẩy code sang nhánh người khác = thay đổi repo chung; nếu user nói "làm đi" thì cứ đẩy thẳng (fast-forward từ Initial commit nên an toàn, không ghi đè gì).
+Kế hoạch làm việc sau khi đẩy: xem `PHAN-CONG.md` ở gốc repo (tiếp sức 4 giai đoạn, tránh xung đột merge).
 
 ### 🟡 Ưu tiên 2 — PR `Duc_Luong` → `main` (khi nhóm thống nhất)
 
@@ -95,13 +101,15 @@ CI đang xanh (11 tests pass) nên PR sẽ pass checks. Có thể tạo bằng:
 ```bash
 cd /d/WORK/NAM4/3_CDTH/Website_NoiThat
 php artisan serve                      # chạy web :8000
-php artisan test                       # 11 tests / 23 assertions (SQLite :memory:)
+php artisan test                       # 20 tests / 57 assertions (SQLite :memory:)
 php artisan migrate:fresh --seed      # reset dữ liệu demo
 ./vendor/bin/pint                     # auto-fix style code
 # Sinh lại tài liệu:
 python scripts/fill_proposal.py        # điền lại Proposal/Báo cáo từ file gốc (sửa ASSIGNMENTS trong script nếu đổi phân công)
 python ~/.claude/skills/furniture-web/scripts/gen_proposal_docx.py --proposal --out docs/Proposal-WebNoiThat.docx
 python ~/.claude/skills/furniture-web/scripts/gen_diagrams.py --type all --out docs/SoDo-UML.md
+# Tài liệu phân công (NGOÀI repo — sinh vào D:\WORK\NAM4\3_CDTH\):
+python ../gen_assignment_docs.py       # Mota_Jira_new.docx + PHAN_CONG.docx dạng bảng theo sprint
 # Đẩy code sang nhánh thành viên (Ưu tiên 1, nếu user chốt cách A):
 git push origin Duc_Luong:Nhu_Kien
 git push origin Duc_Luong:Phan_Kiet
@@ -111,3 +119,5 @@ git push origin Duc_Luong:Phan_Kiet
 
 Mở Claude Code tại thư mục dự án và nói: **"Đọc HANDOFF.md rồi xử lý các việc còn tồn đọng theo thứ tự."**
 Phiên mới nên bắt đầu từ **mục 4 — Ưu tiên 1** (đưa code sang nhánh `Nhu_Kien` + `Phan_Kiet`, hỏi user chọn cách A/B trước khi đẩy). Kiểm tra tab GitHub Actions trước khi sửa gì khác.
+
+> ⚠️ Bài học từ phiên 4 (đã ghi vào SKILL.md mục "Quy tắc chống rủi ro"): file nguồn docx có thể bị mất — KHÔNG đọc file output làm nguồn input; sinh file vào thư mục tạm verify PASS rồi mới đè bản thật; sau khi sinh luôn đọc lại file đối chiếu số bảng/task.
