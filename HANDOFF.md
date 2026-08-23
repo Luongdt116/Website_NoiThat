@@ -1,7 +1,7 @@
 # 📋 HANDOFF — Ghi chú chuyển tiếp giữa các phiên làm việc
 
 > File này dành cho **phiên Claude Code tiếp theo** (hoặc thành viên nhóm) đọc để nắm trạng thái dự án,
-> các lỗi còn tồn đọng và việc cần làm. Cập nhật lần cuối: **2026-08-23** (phiên 2: CI đã XANH ✅).
+> các lỗi còn tồn đọng và việc cần làm. Cập nhật lần cuối: **2026-08-23** (phiên 3: polish + điền thông tin nhóm vào Proposal/Báo cáo ✅).
 
 ---
 
@@ -11,7 +11,7 @@
 |---|---|
 | Đề tài | Website bán đồ nội thất trực tuyến (đồ án tích hợp, nhóm 3 người) |
 | Thư mục | `D:\WORK\NAM4\3_CDTH\Website_NoiThat` |
-| Nhánh làm việc | `Duc_Luong` (còn có `Nhu_Kien`, `Phan_Kiet`, `main` của nhóm) |
+| Nhánh làm việc | `Duc_Luong` (đầy đủ code, CI xanh). `main` / `Nhu_Kien` / `Phan_Kiet` trên GitHub **vẫn dừng ở Initial commit** — chưa có code |
 | Repo | https://github.com/Luongdt116/Website_NoiThat |
 | Tech stack | Laravel 11 (^11.31) · MySQL 8.0 · Blade + Bootstrap 5 (CDN, không cần npm) · Docker Compose · GitHub Actions |
 | Kiến trúc | Route → Controller (Web/Api) → Service → Repository → Model Eloquent → MySQL |
@@ -44,6 +44,12 @@ Người dùng đã đồng ý: làm liên tục, không cần hỏi từng bư�
 - [x] **(phiên 2)** Nâng cấp view `products/show.blade.php` (ảnh lớn, giá nổi bật, badge tồn kho thấp, nút thêm giỏ theo tông wood) — commit `75ecd8e`
 - [x] **(phiên 2)** Nâng cấp view `admin/users/index.blade.php` (card + badge trạng thái + icon toggle) — commit `75ecd8e`
 - [x] **(phiên 2)** README.md đã thay mật khẩu DB thật bằng placeholder — commit `75ecd8e`
+- [x] **(phiên 3)** Polish tổng thể (commit `43956e1`): fix nghiệp vụ giỏ hàng (validate số lượng theo tồn kho + check quyền sở hữu cart), OrderService chặn giỏ rỗng + hoàn kho khi hủy đơn (có guard chống hoàn 2 lần), viết lại views admin (orders/show, users/index, categories), xóa welcome.blade.php, test tăng lên **11 tests / 23 assertions xanh**, CI vẫn xanh
+- [x] **(phiên 3)** Điền thông tin nhóm + phân công vào Proposal/Báo cáo `.docx` từ file gốc "Website ban do noi that.docx" — commit `1df173e`, `c8c73f2`. Chi tiết:
+  - Proposal: 3 thành viên + vai trò (Lương – Nhóm trưởng·Backend, Kiên – Backend, Kiệt – Frontend), GVHD Phạm Hữu Tùng
+  - Điền đủ **26/26 dòng "Phân công công việc"** trong 5 bảng kế hoạch 10 tuần; sửa chữ sót template khách sạn ("Room, Booking" → "Products, Orders, Cart")
+  - Báo cáo: thêm khối thông tin nhóm sau tiêu đề
+  - Tái tạo được qua `python scripts/fill_proposal.py` (dict `ASSIGNMENTS` trong script là nguồn chuẩn)
 
 ## 3. ⚠️ Lỗi/rủi ro còn tồn đọng
 
@@ -54,28 +60,45 @@ Người dùng đã đồng ý: làm liên tục, không cần hỏi từng bư�
 
 ## 4. Việc tiếp theo (theo thứ tự ưu tiên)
 
-- [x] ~~Sửa `ci.yml` + `.env.example` → CI xanh~~ ✅ Hoàn thành (run `32622139909`)
-- [x] ~~Nâng cấp view `products/show.blade.php`~~ ✅
-- [x] ~~Đẹp hơn view `admin/users/index.blade.php`~~ ✅
-- [x] ~~Thay mật khẩu thật trong README.md~~ ✅
-- [x] **(phiên 3)** Điền thông tin nhóm + phân công vào Proposal/Báo cáo `.docx` từ file gốc "Website ban do noi that.docx" — commit `1df173e`
-- [ ] Khi nhóm thống nhất: tạo PR `Duc_Luong` → `main` (hiện `main` vẫn chỉ có Initial commit)
-- [ ] Quay video demo các luồng chính (yêu cầu đồ án): duyệt/lọc → đăng nhập → giỏ → đặt hàng → admin duyệt đơn
+### 🔴 Ưu tiên 1 — Đưa code sang nhánh `Nhu_Kien` và `Phan_Kiet` (yêu cầu của Lương, chưa làm)
+
+User muốn 2 thành viên kia có code để tự làm commit trên nhánh của mình. Trạng thái đã kiểm tra:
+`origin/Nhu_Kien` và `origin/Phan_Kiet` **đã tồn tại trên GitHub nhưng dừng ở Initial commit** (`a5c8668`, giống `main`).
+Cần hỏi lại user trước khi đẩy vì có 2 cách làm, user chưa chốt:
+
+- **Cách A (đề xuất)**: đẩy full code `Duc_Luong` lên cả 2 nhánh (`git push origin Duc_Luong:Nhu_Kien` + `Duc_Luong:Phan_Kiet`). Sau đó Kiên/Kiệt checkout nhánh mình, cấu hình git account cá nhân và tự commit phần việc (Kiên: Auth/API/Seeder/test backend; Kiệt: views/UI/Blade). Lịch sử commit trung thực, merge về sau dễ.
+- **Cách B**: chia sẵn commit theo vai trò trên từng nhánh, gắn tên tác giả tương ứng — cần email/username GitHub của Kiên và Kiệt.
+
+LƯU Ý: đẩy code sang nhánh người khác = thay đổi repo chung; nếu user nói "làm đi" thì cứ đẩy thẳng (fast-forward từ Initial commit nên an toàn, không ghi đè gì).
+
+### 🟡 Ưu tiên 2 — PR `Duc_Luong` → `main` (khi nhóm thống nhất)
+
+CI đang xanh (11 tests pass) nên PR sẽ pass checks. Có thể tạo bằng:
+`gh pr create --base main --head Duc_Luong --title "Đồ án Website bán đồ nội thất" --body "..."`
+
+### 🟢 Ưu tiên 3 — Video demo + chuẩn bị nộp
+
+- [ ] Quay video demo các luồng chính (yêu cầu đồ án): duyệt/lọc → đăng nhập → giỏ → đặt hàng → admin duyệt đơn. Tài khoản demo: admin@furniture.test / user@furniture.test (password) — xem `resources/accounts.md`
+- [ ] Checklist nộp: Proposal `.docx` ✅ · Báo cáo `.docx` ✅ · sơ đồ UML ✅ · video ⏳ · deploy (nếu yêu cầu) ⏳
 
 ### Lệnh hay dùng
 
 ```bash
 cd /d/WORK/NAM4/3_CDTH/Website_NoiThat
 php artisan serve                      # chạy web :8000
-php artisan test                       # 8 feature tests
+php artisan test                       # 11 tests / 23 assertions (SQLite :memory:)
 php artisan migrate:fresh --seed      # reset dữ liệu demo
 ./vendor/bin/pint                     # auto-fix style code
-# Sinh lại tài liệu (skill furniture-web):
+# Sinh lại tài liệu:
+python scripts/fill_proposal.py        # điền lại Proposal/Báo cáo từ file gốc (sửa ASSIGNMENTS trong script nếu đổi phân công)
 python ~/.claude/skills/furniture-web/scripts/gen_proposal_docx.py --proposal --out docs/Proposal-WebNoiThat.docx
 python ~/.claude/skills/furniture-web/scripts/gen_diagrams.py --type all --out docs/SoDo-UML.md
+# Đẩy code sang nhánh thành viên (Ưu tiên 1, nếu user chốt cách A):
+git push origin Duc_Luong:Nhu_Kien
+git push origin Duc_Luong:Phan_Kiet
 ```
 
 ## 5. Cách tiếp tục ở phiên mới
 
 Mở Claude Code tại thư mục dự án và nói: **"Đọc HANDOFF.md rồi xử lý các việc còn tồn đọng theo thứ tự."**
-Phiên mới nên bắt đầu từ mục 3 (lỗi tồn đọng) — đặc biệt kiểm tra tab GitHub Actions trước khi sửa gì khác.
+Phiên mới nên bắt đầu từ **mục 4 — Ưu tiên 1** (đưa code sang nhánh `Nhu_Kien` + `Phan_Kiet`, hỏi user chọn cách A/B trước khi đẩy). Kiểm tra tab GitHub Actions trước khi sửa gì khác.
