@@ -142,4 +142,56 @@ class OrderFlowTest extends TestCase
             ->get('/admin')
             ->assertForbidden();
     }
+
+    /**
+     * Thêm vào giỏ quá tồn kho phải bị chặn, giỏ không nhận số lượng vượt kho.
+     */
+    public function test_cannot_add_more_than_stock_to_cart(): void
+    {
+        $this->actingAs($this->user);
+
+        // Thử thêm 999 chiếc khi kho chỉ có 10 → bị từ chối với flash error
+        $response = $this->post('/gio-hang/them', ['product_id' => $this->product->id, 'quantity' => 999]);
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseCount('carts', 0);
+    }
+
+    /**
+     * Admin hủy đơn: tồn kho được hoàn lại đúng số lượng đã trừ.
+     */
+    public function test_cancelling_order_restores_stock(): void
+    {
+        $this->actingAs($this->user);
+        $this->post('/gio-hang/them', ['product_id' => $this->product->id, 'quantity' => 3]);
+        $this->post('/don-hang', ['address' => 'addr', 'phone' => '0900000000']);
+
+        // Sau khi đặt: tồn kho 10 -> 7
+        $this->assertDatabaseHas('products', ['id' => $this->product->id, 'stock' => 7]);
+
+        $orderId = Order::where('user_id', $this->user->id)->value('id');
+        $this->actingAs($this->admin)->post("/admin/orders/{$orderId}/cancel");
+
+        // Hủy đơn: tồn kho hoàn lại 7 -> 10
+        $this->assertDatabaseHas('orders', ['id' => $orderId, 'status' => 'cancelled']);
+        $this->assertDatabaseHas('products', ['id' => $this->product->id, 'stock' => 10]);
+    }
+
+    /**
+     * Hủy 2 lần không hoàn kho 2 lần (guard chống hoàn trùng).
+     */
+    public function test_cancelling_twice_does_not_double_restore_stock(): void
+    {
+        $this->actingAs($this->user);
+        $this->post('/gio-hang/them', ['product_id' => $this->product->id, 'quantity' => 3]);
+        $this->post('/don-hang', ['address' => 'addr', 'phone' => '0900000000']);
+
+        $orderId = Order::where('user_id', $this->user->id)->value('id');
+
+        // Hủy lần 1: hoàn kho về 10; hủy lần 2: kho phải giữ nguyên 10
+        $this->actingAs($this->admin)->post("/admin/orders/{$orderId}/cancel");
+        $this->actingAs($this->admin)->post("/admin/orders/{$orderId}/cancel");
+
+        $this->assertDatabaseHas('products', ['id' => $this->product->id, 'stock' => 10]);
+    }
 }

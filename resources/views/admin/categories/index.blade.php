@@ -3,8 +3,10 @@
 @section('title', 'Quản lý danh mục')
 
 @section('content')
-<h2>Quản lý danh mục</h2>
-<a href="{{ route('admin.categories.create') }}" class="btn btn-wood mb-3">+ Thêm danh mục</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-wood mb-0"><i class="bi bi-tags"></i> Quản lý danh mục</h2>
+    <a href="{{ route('admin.categories.create') }}" class="btn btn-wood"><i class="bi bi-plus-lg"></i> Thêm danh mục</a>
+</div>
 <table class="table bg-white shadow-sm align-middle">
     <thead class="table-light">
         <tr><th>Tên</th><th>Slug</th><th>Số sản phẩm</th><th width="180">Thao tác</th></tr>

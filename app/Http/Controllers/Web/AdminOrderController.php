@@ -23,27 +23,28 @@ class AdminOrderController extends Controller
     {
         $this->orders->updateStatus($id, 'confirmed');
 
-        return back();
+        return back()->with('success', "Đã xác nhận đơn #{$id}.");
     }
 
     public function ship($id)
     {
         $this->orders->updateStatus($id, 'shipping');
 
-        return back();
+        return back()->with('success', "Đơn #{$id} đang được giao.");
     }
 
     public function complete($id)
     {
         $this->orders->updateStatus($id, 'completed');
 
-        return back();
+        return back()->with('success', "Đã hoàn tất đơn #{$id}.");
     }
 
+    // Hủy đơn: OrderService sẽ hoàn lại tồn kho trong transaction
     public function cancel($id)
     {
         $this->orders->updateStatus($id, 'cancelled');
 
-        return back();
+        return back()->with('success', "Đã hủy đơn #{$id}, tồn kho đã được hoàn lại.");
     }
 }
